@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NTL Resource Portal</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* the css styling for the web page*/
+    :root {
+      --red:        #C0272D;
+      --red-bright: #E8323A;
+      --red-dark:   #8B1A1E;
+      --navy:       #151d2b;
+      --navy-mid:   #1a2332;
+      --navy-border:#2a3545;
+      --bg:         #f5f5f5;
+      --white:      #ffffff;
+      --text-dark:  #1a1a1a;
+      --text-nav:   #e8e8e8;
+      --text-muted: #8899aa;
+      --border:     #dddddd;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text-dark); font-family: 'Inter', sans-serif; min-height: 100vh; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: var(--navy); border-bottom: 0.5px solid var(--navy-border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; color: var(--text-nav); text-decoration: none; }
+    .nav-logo-mark { background: var(--red); color: white; font-size: 0.65rem; font-weight: 700; padding: 3px 8px; letter-spacing: 0.08em; }
+    .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--red-bright); }
+    .nav-links a.active { color: var(--red-bright); font-weight: 500; }
+    @media (max-width: 600px) { .nav-links { display: none; } }
+    .hero { padding-top: 60px; background: var(--navy-mid); border-bottom: 3px solid var(--red); padding-bottom: 2.5rem; }
+    .hero-inner { max-width: 820px; margin: 0 auto; padding: 2.5rem 2rem 0; animation: fadeUp 0.5s ease both; }
+    .hero-tag { font-size: 0.7rem; color: var(--red-bright); letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.7rem; display: flex; align-items: center; gap: 8px; }
+    .hero-tag::before { content: ''; display: block; width: 20px; height: 2px; background: var(--red-bright); }
+    .hero-title { font-family: 'Rajdhani', sans-serif; font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 700; color: var(--text-nav); line-height: 1.05; letter-spacing: 0.02em; margin-bottom: 0.8rem; }
+    .hero-title span { color: var(--red-bright); }
+    .hero-sub { font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; font-weight: 300; max-width: 500px; }
+    .form-section { max-width: 820px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+    .section-label { font-size: 0.68rem; color: var(--red); letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.3rem; }
+    .section-title { font-family: 'Rajdhani', sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.3rem; }
+    .section-desc { font-size: 0.8rem; color: #888; margin-bottom: 1.8rem; font-weight: 300; }
+    .form-card { background: var(--white); border: 0.5px solid var(--border); border-top: 2px solid var(--red); padding: 2rem; animation: fadeUp 0.5s 0.15s ease both; }
+    .form-row-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+    .form-row-single { margin-bottom: 1.25rem; }
+    @media (max-width: 580px) { .form-row-group { grid-template-columns: 1fr; } }
+    .form-group label { display: block; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 0.45rem; }
+    .form-group label .req { color: var(--red-bright); margin-left: 2px; }
+    .form-control-ntl { width: 100%; background: #fafafa; border: 0.5px solid var(--border); color: var(--text-dark); padding: 0.65rem 0.9rem; font-family: 'Inter', sans-serif; font-size: 0.875rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; appearance: none; -webkit-appearance: none; border-radius: 2px; }
+    .form-control-ntl:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(192,39,45,0.1); background: var(--white); }
+    .form-control-ntl::placeholder { color: #bbb; }
+    select.form-control-ntl { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; background-color: #fafafa; padding-right: 2.5rem; cursor: pointer; }
+    .pills-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 0.6rem; }
+    .type-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
+    .type-pill input[type="radio"] { display: none; }
+    .type-pill label { display: inline-flex; align-items: center; gap: 5px; padding: 0.4rem 1rem; border: 0.5px solid var(--border); background: var(--white); color: #666; font-size: 0.78rem; font-weight: 400; cursor: pointer; transition: all 0.15s; user-select: none; border-radius: 2px; }
+    .type-pill input[type="radio"]:checked + label { border-color: var(--red); color: var(--red); background: #fff5f5; font-weight: 500; }
+    .type-pill label:hover { border-color: var(--red-dark); color: var(--text-dark); }
+    .field-only { display: none; margin-bottom: 1.25rem; }
+    .field-only.visible { display: block; }
+    .btn-submit { width: 100%; padding: 0.85rem 2rem; background: var(--red); color: #fff; border: none; font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 0.25rem; border-radius: 2px; }
+    .btn-submit:hover { background: var(--red-bright); }
+    .btn-submit:active { transform: scale(0.995); }
+    .flash-success { background: #f0fff4; border: 0.5px solid #86efac; border-left: 3px solid #22c55e; color: #166534; padding: 0.75rem 1rem; font-size: 0.85rem; margin-bottom: 1.5rem; border-radius: 2px; }
+    .flash-error { background: #fff5f5; border: 0.5px solid #fca5a5; border-left: 3px solid var(--red); color: var(--red-dark); padding: 0.75rem 1rem; font-size: 0.85rem; margin-bottom: 1.5rem; border-radius: 2px; }
+    footer { background: var(--navy); border-top: 0.5px solid var(--navy-border); padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    footer p { font-size: 0.72rem; color: #4a5568; letter-spacing: 0.04em; }
+    footer span { color: var(--red-bright); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">
+      <span class="nav-logo-mark">NTL</span>
+      Resource Portal
+    </a>
+    <ul class="nav-links">
+      <li><a href="/" class="active">New Request</a></li>
+      <li><a href="/admin">Admin Dashboard</a></li>
+    </ul>
+  </nav>
+<!--hero section at the start of the page-->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-tag">Next Technologies Limited</div>
+      <h1 class="hero-title">Resource <span>Management</span> Portal</h1>
+      <p class="hero-sub">Submit requests for office supplies, meeting rooms, appliances, catering, and field day resources. All requests are reviewed and actioned by the admin team.</p>
+    </div>
+  </section>
+-->
+  <section class="form-section">
+    <p class="section-label">Submit a Request</p>
+    <h2 class="section-title">What do you need?</h2>
+    <p class="section-desc">Fields marked <span style="color:var(--red-bright)">*</span> are required.</p>
+
+    <!--flask templating agent that checks if there are any flashed messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="form-card">
+      <form method="POST" action="/submit">
+<!--start of the forms section of the page-->
+        <div class="form-row-group">
+          <div class="form-group">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" name="name" class="form-control-ntl" placeholder="e.g. John Kamau" required>
+          </div>
+          <div class="form-group">
+            <label>Work ID <span class="req">*</span></label>
+            <input type="text" name="work_id" class="form-control-ntl" placeholder="e.g. NTL-0042" required>
+          </div>
+        </div>
+
+        <div class="pills-label">Request Type <span style="color:var(--red-bright)">*</span></div>
+        <div class="type-pills">
+          <div class="type-pill">
+            <input type="radio" name="request_type" id="type-office" value="office_items" checked>
+            <label for="type-office">Office Items</label>
+          </div>
+          <div class="type-pill">
+            <input type="radio" name="request_type" id="type-room" value="meeting_room">
+            <label for="type-room">Meeting Room</label>
+          </div>
+          <div class="type-pill">
+            <input type="radio" name="request_type" id="type-tea" value="tea_catering">
+            <label for="type-tea">Tea / Catering</label>
+          </div>
+          <div class="type-pill">
+            <input type="radio" name="request_type" id="type-field" value="field_day">
+            <label for="type-field">Field Day</label>
+          </div>
+          <div class="type-pill">
+            <input type="radio" name="request_type" id="type-appliance" value="appliance">
+            <label for="type-appliance">Appliance</label>
+          </div>
+        </div>
+
+        <div class="form-row-single form-group">
+          <label>Items / Resources Needed <span class="req">*</span></label>
+          <textarea name="items_needed" class="form-control-ntl" rows="3"
+            placeholder="List what you need, e.g. projector, extension cable, whiteboard markers..." required></textarea>
+        </div>
+
+        <div class="form-row-group">
+          <div class="form-group">
+            <label>Date Required <span class="req">*</span></label>
+            <input type="date" name="date" class="form-control-ntl" required>
+          </div>
+          <div class="form-group">
+            <label>Time Required <span class="req">*</span></label>
+            <input type="time" name="time" class="form-control-ntl" required>
+          </div>
+        </div>
+
+        <div class="field-only form-group" id="venue-group">
+          <label>Venue / Destination <span class="req">*</span></label>
+          <input type="text" name="venue" class="form-control-ntl" placeholder="e.g. Westlands client site, Mombasa Road">
+        </div>
+
+        <button type="submit" class="btn-submit">Submit Request &rarr;</button>
+
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <p>NTL Resource Management Portal &mdash; Internal Use Only</p>
+    <p>Built by <span>Nicole Wangeci</span> &mdash; Cloud Intern 2026</p>
+  </footer>
+
+  <script>
+    document.querySelectorAll('input[name="request_type"]').forEach(radio => {
+      radio.addEventListener('change', function () {
+        document.getElementById('venue-group').classList.toggle('visible', this.value === 'field_day');
+      });
+    });
+  </script>
+
+</body>
+</html>
