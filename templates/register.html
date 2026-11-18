@@ -1,73 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NTL — Register</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --red: #C0272D;
-      --red-bright: #E8323A;
-      --navy: #151d2b;
-      --navy-mid: #1a2332;
-      --navy-border: #2a3545;
-      --bg: #f5f5f5;
-      --white: #ffffff;
-      --text-dark: #1a1a1a;
-      --text-nav: #e8e8e8;
-      --text-muted: #8899aa;
-      --border: #dddddd;
+    [data-theme="dark"] {
+      --bg: #0f1520; --card-bg: #1a2332; --card-border: #2a3545;
+      --nav-bg: #151d2b; --text: #e8e8e8; --text-muted: #8899aa;
+      --input-bg: #111928; --input-border: #2a3545; --input-text: #e8e8e8;
+      --toggle-bg: #2a3545;
     }
+    [data-theme="light"] {
+      --bg: #f5f5f5; --card-bg: #ffffff; --card-border: #e0e0e0;
+      --nav-bg: #151d2b; --text: #1a1a1a; --text-muted: #666666;
+      --input-bg: #f9f9f9; --input-border: #dddddd; --input-text: #1a1a1a;
+      --toggle-bg: #e0e0e0;
+    }
+    :root { --red: #C0272D; --red-bright: #E8323A; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text-dark); font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-    nav { background: var(--navy); border-bottom: 0.5px solid var(--navy-border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; }
-    .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; color: var(--text-nav); text-decoration: none; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; transition: background 0.3s, color 0.3s; }
+
+    nav { background: var(--nav-bg); border-bottom: 0.5px solid #2a3545; padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; color: #e8e8e8; text-decoration: none; }
     .nav-logo-mark { background: var(--red); color: white; font-size: 0.65rem; font-weight: 700; padding: 3px 8px; letter-spacing: 0.08em; }
-    .page { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-    .card { background: var(--white); border: 0.5px solid var(--border); border-top: 2px solid var(--red); padding: 2.5rem; width: 100%; max-width: 480px; }
-    .card-tag { font-size: 0.68rem; color: var(--red); letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.3rem; }
-    .card-title { font-family: 'Rajdhani', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.2rem; }
-    .card-title span { color: var(--red-bright); }
-    .card-sub { font-size: 0.8rem; color: #888; margin-bottom: 1.8rem; font-weight: 300; }
-    .form-row-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem; }
-    .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 0.45rem; }
-    .form-group label .req { color: var(--red-bright); margin-left: 2px; }
-    .form-control-ntl { width: 100%; background: #fafafa; border: 0.5px solid var(--border); color: var(--text-dark); padding: 0.65rem 0.9rem; font-family: 'Inter', sans-serif; font-size: 0.875rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; border-radius: 2px; appearance: none; }
-    .form-control-ntl:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(192,39,45,0.1); background: var(--white); }
-    .form-control-ntl::placeholder { color: #bbb; }
-    select.form-control-ntl { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; background-color: #fafafa; padding-right: 2.5rem; cursor: pointer; }
-    .btn-submit { width: 100%; padding: 0.85rem 2rem; background: var(--red); color: #fff; border: none; font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: 0.25rem; border-radius: 2px; }
+    .theme-toggle { width: 34px; height: 34px; border-radius: 50%; background: var(--toggle-bg); border: 0.5px solid var(--card-border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
+    .theme-toggle:hover { border-color: var(--red); color: var(--red-bright); }
+
+    .page { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; position: relative; overflow: hidden; }
+    .page-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 50%, rgba(192,39,45,0.08) 0%, transparent 55%); pointer-events: none; }
+    .page-inner { position: relative; z-index: 2; width: 100%; max-width: 520px; animation: fadeUp 0.5s ease both; }
+
+    .page-header { text-align: center; margin-bottom: 2rem; }
+    .page-tag { font-size: 0.68rem; color: var(--red-bright); letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .page-tag::before, .page-tag::after { content: ''; display: block; width: 16px; height: 1px; background: var(--red-bright); }
+    .page-title { font-family: 'Rajdhani', sans-serif; font-size: 2rem; font-weight: 700; color: var(--text); }
+    .page-title span { color: var(--red-bright); }
+    .page-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; font-weight: 300; }
+
+    .reg-card { background: var(--card-bg); border: 0.5px solid var(--card-border); border-top: 2px solid var(--red); padding: 2rem; transition: background 0.3s; }
+
+    .form-row-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    @media (max-width: 480px) { .form-row-group { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.65rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .req { color: var(--red-bright); margin-left: 2px; }
+    .form-control-ntl { width: 100%; background: var(--input-bg); border: 0.5px solid var(--input-border); color: var(--input-text); padding: 0.65rem 0.9rem; font-family: 'Inter', sans-serif; font-size: 0.875rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; border-radius: 2px; appearance: none; }
+    .form-control-ntl:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(192,39,45,0.1); }
+    .form-control-ntl::placeholder { color: var(--text-muted); opacity: 0.5; }
+    select.form-control-ntl { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; background-color: var(--input-bg); padding-right: 2.5rem; cursor: pointer; }
+
+    .role-info { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.4rem; font-style: italic; }
+
+    .divider { height: 0.5px; background: var(--card-border); margin: 1.2rem 0; }
+
+    .btn-submit { width: 100%; padding: 0.85rem 2rem; background: var(--red); color: #fff; border: none; font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; border-radius: 2px; }
     .btn-submit:hover { background: var(--red-bright); }
-    .card-footer-text { text-align: center; font-size: 0.8rem; color: #888; margin-top: 1.2rem; }
-    .card-footer-text a { color: var(--red); text-decoration: none; font-weight: 500; }
-    .card-footer-text a:hover { color: var(--red-bright); }
-    .flash-success { background: #f0fff4; border: 0.5px solid #86efac; border-left: 3px solid #22c55e; color: #166534; padding: 0.75rem 1rem; font-size: 0.85rem; margin-bottom: 1.2rem; border-radius: 2px; }
-    .flash-error { background: #fff5f5; border: 0.5px solid #fca5a5; border-left: 3px solid var(--red); color: #991b1b; padding: 0.75rem 1rem; font-size: 0.85rem; margin-bottom: 1.2rem; border-radius: 2px; }
-    footer { background: var(--navy); border-top: 0.5px solid var(--navy-border); padding: 1rem 2rem; text-align: center; }
+
+    .card-footer-text { text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 1.2rem; }
+    .card-footer-text a { color: var(--red-bright); text-decoration: none; font-weight: 500; }
+    .card-footer-text a:hover { color: #ff4d4d; }
+
+    .flash-success { background: rgba(34,197,94,0.08); border: 0.5px solid rgba(34,197,94,0.2); border-left: 3px solid #22c55e; color: #22c55e; padding: 0.75rem 1rem; font-size: 0.82rem; margin-bottom: 1.5rem; }
+    .flash-error { background: rgba(192,39,45,0.08); border: 0.5px solid rgba(192,39,45,0.2); border-left: 3px solid var(--red); color: var(--red-bright); padding: 0.75rem 1rem; font-size: 0.82rem; margin-bottom: 1.5rem; }
+
+    footer { background: var(--nav-bg); border-top: 0.5px solid #2a3545; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
     footer p { font-size: 0.72rem; color: #4a5568; }
     footer span { color: var(--red-bright); }
+
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-    .card { animation: fadeUp 0.5s ease both; }
-    @media (max-width: 480px) { .form-row-group { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
 
   <nav>
-    <a href="/" class="nav-logo">
+    <a href="/landing" class="nav-logo">
       <span class="nav-logo-mark">NTL</span>
       Resource Portal
     </a>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
   </nav>
 
   <div class="page">
-    <div class="card">
-      <p class="card-tag">Create Account</p>
-      <h1 class="card-title">Join the <span>Portal</span></h1>
-      <p class="card-sub">Register with your NTL details to start submitting requests.</p>
+    <div class="page-bg"></div>
+    <div class="page-inner">
+
+      <div class="page-header">
+        <div class="page-tag">Staff Registration</div>
+        <h1 class="page-title">Create <span>Account</span></h1>
+        <p class="page-sub">Register with your NTL details to start submitting requests.</p>
+      </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -77,60 +103,69 @@
         {% endif %}
       {% endwith %}
 
-      <form method="POST" action="/register">
+      <div class="reg-card">
+        <form method="POST" action="/register">
 
-        <div class="form-row-group">
-        <div class="form-group">
-          <label>Email Address <span class="req">*</span></label>
-          <input type="email" name="email" class="form-control-ntl" placeholder="e.g. john@ntl.co.ke" required>
-        </div> <!-- Form group for Work ID input field with the email prompt as well -->
-          <div class="form-group">
-            <label>Work ID <span class="req">*</span></label>
-            <input type="text" name="work_id" class="form-control-ntl" placeholder="e.g. NTL-0042" required>
+          <div class="form-row-group">
+            <div class="form-group">
+              <label>Full Name <span class="req">*</span></label>
+              <input type="text" name="name" class="form-control-ntl" placeholder="e.g. John Kamau" required>
+            </div>
+            <div class="form-group">
+              <label>Work ID <span class="req">*</span></label>
+              <input type="text" name="work_id" class="form-control-ntl" placeholder="e.g. NTL-0042" required>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>Role <span class="req">*</span></label>
-          <select name="role" class="form-control-ntl" required>
-            <option value="staff">Staff</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label>Email Address <span class="req">*</span></label>
+            <input type="email" name="email" class="form-control-ntl" placeholder="e.g. john.kamau@ntl.co.ke" required>
+            <div class="role-info">Used for request status notifications via Gmail.</div>
+          </div>
 
-        <div class="form-group">
-          <label>Password <span class="req">*</span></label>
-          <input type="password" name="password" class="form-control-ntl" placeholder="••••••••" required>
-        </div>
+          <div class="divider"></div>
 
-        <div class="form-group">
-          <label>Confirm Password <span class="req">*</span></label>
-          <input type="password" name="confirm_password" class="form-control-ntl" placeholder="••••••••" required>
-        </div>
+          <div class="form-group">
+            <label>Password <span class="req">*</span></label>
+            <input type="password" name="password" class="form-control-ntl" placeholder="••••••••" required>
+          </div>
 
-        <button type="submit" class="btn-submit">Create Account &rarr;</button>
+          <div class="form-group">
+            <label>Confirm Password <span class="req">*</span></label>
+            <input type="password" name="confirm_password" class="form-control-ntl" placeholder="••••••••" required>
+          </div>
 
-      </form>
+          <button type="submit" class="btn-submit">Create Account &rarr;</button>
+        </form>
 
-      <p class="card-footer-text">Already have an account? <a href="/login">Sign in here</a></p>
+        <p class="card-footer-text">Already have an account? <a href="/landing">Sign in here</a></p>
+      </div>
     </div>
   </div>
 
   <footer>
-    <p>NTL Resource Management Portal &mdash; Built by <span>Nicole Wangeci</span></p>
+    <p>NTL Resource Management Portal &mdash; Internal Use Only</p>
+    <p>Built by <span>Lucian Katana</span> &mdash; Cloud Intern 2026</p>
   </footer>
 
   <script>
-    /* Confirm password validation before submit */
+    const moonSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+    const sunSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('themeBtn').innerHTML = isDark ? moonSVG : sunSVG;
+      localStorage.setItem('ntl-theme', isDark ? 'light' : 'dark');
+    }
+    const saved = localStorage.getItem('ntl-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    if (saved === 'light') document.getElementById('themeBtn').innerHTML = moonSVG;
+
     document.querySelector('form').addEventListener('submit', function(e) {
       const pw = document.querySelector('input[name="password"]').value;
       const cpw = document.querySelector('input[name="confirm_password"]').value;
-      if (pw !== cpw) {
-        e.preventDefault();
-        alert('Passwords do not match.');
-      }
+      if (pw !== cpw) { e.preventDefault(); alert('Passwords do not match.'); }
     });
   </script>
-
 </body>
 </html>

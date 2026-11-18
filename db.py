@@ -1,28 +1,31 @@
-# Importing necessary libraries and loading environment variables for Cosmos DB connection.
-from azure.cosmos import CosmosClient
-from dotenv import load_dotenv
+# db.py - Database connection layer.
+# The only file that knows HOW to reach Azure Cosmos DB. Models call get_container().
+
+from pathlib import Path
 import os
 
-load_dotenv(dotenv_path=".env")
+from azure.cosmos import CosmosClient
+from dotenv import load_dotenv
 
-# Reading Cosmos DB credentials from environment variables
-COSMOS_CONNECTION_STRING = os.getenv("COSMOS_CONNECTION_STRING")
-COSMOS_DATABASE = os.getenv("COSMOS_DATABASE")
+# Load .env from the project root, no matter which folder the app is started from
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
-# Establishing connection to Cosmos DB and getting the database client
-client = CosmosClient.from_connection_string(COSMOS_CONNECTION_STRING)
-database = client.get_database_client(COSMOS_DATABASE)
+_client = None
+_database = None
 
-# Dedicated container clients for easy import across your project
-users_container = database.get_container_client("users")
-requests_container = database.get_container_client("requests")
-inventory_container = database.get_container_client("inventory")
 
-# Dynamic helper function to fetch any container by name (defaults to 'requests')
-def get_container(container_name='requests'):
-    """Returns the requested Cosmos DB container client."""
-    if container_name == 'users':
-        return users_container
-    elif container_name == 'inventory':
-        return inventory_container
-    return requests_container
+def _get_database():
+    """Connect to Cosmos DB the first time it is needed, then reuse the connection."""
+    global _client, _database
+    if _database is None:
+        connection_string = os.getenv("COSMOS_CONNECTION_STRING")
+        if not connection_string:
+            raise RuntimeError("COSMOS_CONNECTION_STRING is missing from .env")
+        _client = CosmosClient.from_connection_string(connection_string)
+        _database = _client.get_database_client(os.getenv("COSMOS_DATABASE", "ntl-db"))
+    return _database
+
+
+def get_container(name="requests"):
+    """Return a container client: 'requests', 'users' or 'inventory'."""
+    return _get_database().get_container_client(name)

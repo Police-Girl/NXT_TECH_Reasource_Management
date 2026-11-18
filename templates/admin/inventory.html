@@ -1,0 +1,29 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}NTL - Inventory{% endblock %}
+{% block content %}
+  <div class="page-tag">Inventory</div>
+  <h1 class="page-title">Current <span>Stock</span></h1>
+  <p class="page-sub">Everything staff can request, and how much is left.</p>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <div class="card-title" style="margin:0;">All items ({{ items|length }})</div>
+      <a href="/admin/inventory/edit" class="btn-sm">Edit inventory</a>
+    </div>
+    {% if items %}
+    <div class="inv-grid">
+      {% for item in items %}
+        {% set status = 'out' if item.quantity == 0 else ('low' if item.quantity <= 2 else 'ok') %}
+        <div class="inv-item">
+          <div class="inv-name">{{ item.name }}</div>
+          <div class="inv-cat">{{ item.category }}</div>
+          <div class="inv-count">{{ item.quantity }}</div>
+          <div class="inv-status {{ status }}">{{ 'Out of stock' if status == 'out' else ('Low stock' if status == 'low' else 'Available') }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <div class="empty">No inventory yet. <a href="/admin/inventory/edit" style="color:var(--red-bright);">Add your first item</a>.</div>
+    {% endif %}
+  </div>
+{% endblock %}

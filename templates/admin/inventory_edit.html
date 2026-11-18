@@ -1,0 +1,52 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}NTL - Edit Inventory{% endblock %}
+{% block content %}
+  <div class="page-tag">Inventory</div>
+  <h1 class="page-title">Edit <span>Inventory</span></h1>
+  <p class="page-sub">Add new items, change quantities, or remove items.</p>
+
+  <div class="card">
+    <div class="card-title">Add an item</div>
+    <form method="POST" action="/admin/inventory/edit" class="form-row">
+      <div><label>Item name</label><input type="text" name="name" placeholder="e.g. Projector" required></div>
+      <div>
+        <label>Category</label>
+        <select name="category" required>
+          {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div><label>Quantity</label><input type="number" name="quantity" min="0" value="1" required></div>
+      <button type="submit" class="btn">Add</button>
+    </form>
+  </div>
+
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div class="card-title" style="padding:1rem 1.2rem 0;">Current items ({{ items|length }})</div>
+    {% if items %}
+    <table>
+      <thead><tr><th>Item</th><th>Category</th><th>Quantity</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.category }}</td>
+          <td>
+            <form method="POST" action="/admin/inventory/update/{{ item.id }}/{{ item.category }}" class="qty-form">
+              <input type="number" name="quantity" min="0" value="{{ item.quantity }}">
+              <button type="submit" class="btn-sm">Save</button>
+            </form>
+          </td>
+          <td>
+            <form method="POST" action="/admin/inventory/delete/{{ item.id }}/{{ item.category }}" onsubmit="return confirm('Delete {{ item.name }}?');">
+              <button type="submit" class="btn-sm btn-del">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty">No items yet. Add one above.</div>
+    {% endif %}
+  </div>
+{% endblock %}

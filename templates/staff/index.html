@@ -29,7 +29,7 @@
     .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; color: #e8e8e8; text-decoration: none; }
     .nav-logo-mark { background: var(--red); color: white; font-size: 0.65rem; font-weight: 700; padding: 3px 8px; letter-spacing: 0.08em; }
     .nav-right { display: flex; align-items: center; gap: 1.5rem; }
-    .nav-links { display: flex; align-items: center; gap: 1.5rem; list-style: none; margin-bottom: 0; }
+    .nav-links { display: flex; align-items: center; gap: 1.5rem; list-style: none; }
     .nav-links a { color: #8899aa; text-decoration: none; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
     .nav-links a:hover { color: var(--red-bright); }
     .nav-links a.active { color: var(--red-bright); font-weight: 500; }
@@ -79,7 +79,7 @@
     .flash-error { background: rgba(192,39,45,0.08); border: 0.5px solid rgba(192,39,45,0.2); border-left: 3px solid var(--red); color: var(--red-bright); padding: 0.75rem 1rem; font-size: 0.85rem; margin-bottom: 1.5rem; border-radius: 2px; }
 
     footer { background: var(--nav-bg); border-top: 0.5px solid var(--nav-border); padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between; }
-    footer p { font-size: 0.72rem; color: #4a5568; margin-bottom: 0; }
+    footer p { font-size: 0.72rem; color: #4a5568; }
     footer span { color: var(--red-bright); }
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -130,11 +130,11 @@
         <div class="form-row-group">
           <div class="form-group">
             <label>Full Name <span class="req">*</span></label>
-            <input type="text" name="name" class="form-control-ntl" placeholder="e.g. John Kamau" value="{{ current_user.name }}" required>
+            <input type="text" name="name" class="form-control-ntl" placeholder="e.g. John Kamau" value="{{ current_user.name }}" readonly required>
           </div>
           <div class="form-group">
             <label>Work ID <span class="req">*</span></label>
-            <input type="text" name="work_id" class="form-control-ntl" placeholder="e.g. NTL-0042" value="{{ current_user.work_id }}" required>
+            <input type="text" name="work_id" class="form-control-ntl" placeholder="e.g. NTL-0042" value="{{ current_user.work_id }}" readonly required>
           </div>
         </div>
 
@@ -147,24 +147,9 @@
           <div class="type-pill"><input type="radio" name="request_type" id="type-appliance" value="appliance"><label for="type-appliance">Appliance</label></div>
         </div>
 
-        <div class="form-row-group">
-          <div class="form-group">
-            <label>Items / Resources Needed <span class="req">*</span></label>
-            <select name="items_needed" class="form-control-ntl" required>
-              <option value="" disabled selected>-- Choose an available resource --</option>
-              {% for item in inventory %}
-                {% if item.quantity > 0 %}
-                  <option value="{{ item.name }}">{{ item.name }} &mdash; Available: {{ item.quantity }}</option>
-                {% else %}
-                  <option value="{{ item.name }}" disabled style="color: var(--text-muted);">{{ item.name }} &mdash; Out of Stock</option>
-                {% endif %}
-              {% endfor %}
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Quantity Needed <span class="req">*</span></label>
-            <input type="number" name="quantity_needed" class="form-control-ntl" min="1" value="1" required>
-          </div>
+        <div class="form-row-single form-group">
+          <label>Items / Resources Needed <span class="req">*</span></label>
+          <textarea name="items_needed" class="form-control-ntl" rows="3" placeholder="List what you need, e.g. projector, extension cable, whiteboard markers..." required></textarea>
         </div>
 
         <div class="form-row-group">
@@ -196,7 +181,7 @@
 
   <footer>
     <p>NTL Resource Management Portal &mdash; Internal Use Only</p>
-    <p>Built by <span>Nicole Wangeci</span> &mdash; Cloud Intern 2026</p>
+    <p>Built by <span>Lucian Katana</span> &mdash; Cloud Intern 2026</p>
   </footer>
 
   <script>

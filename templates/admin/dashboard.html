@@ -121,7 +121,7 @@
     .inv-card { background: var(--card-bg); border: 0.5px solid var(--card-border); padding: 1.2rem; margin-bottom: 1.5rem; transition: background 0.3s; }
     .inv-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
     .inv-title { font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--text); }
-    .btn-edit { padding: 0.3rem 0.8rem; background: transparent; border: 0.5px solid var(--card-border); color: var(--text-muted); font-size: 0.72rem; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; text-decoration: none; }
+    .btn-edit { padding: 0.3rem 0.8rem; background: transparent; border: 0.5px solid var(--card-border); color: var(--text-muted); font-size: 0.72rem; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; }
     .btn-edit:hover { border-color: var(--red); color: var(--red-bright); }
     .inv-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.8rem; }
     @media (max-width: 700px) { .inv-grid { grid-template-columns: repeat(2,1fr); } }
@@ -310,9 +310,9 @@
       <div class="table-card">
         <div class="table-header">
           <span class="table-title">Incoming Requests</span>
-          <span class="table-count">{{ requests|length }} total</span>
+          <span class="table-count">{{ table_requests|length }} shown</span>
         </div>
-        {% if requests %}
+        {% if table_requests %}
         <table class="requests-table">
           <thead>
             <tr>
@@ -328,14 +328,14 @@
             </tr>
           </thead>
           <tbody>
-            {% for req in requests %}
+            {% for req in table_requests %}
             <tr>
               <td class="td-name">{{ req.name }}</td>
               <td class="td-id">{{ req.work_id }}</td>
               <td>{{ req.request_type | replace('_', ' ') | title }}</td>
               <td>{{ req.items_needed }}</td>
               <td>{{ req.date }}</td>
-              <td>{{ req.time }}</td>
+              <td>{{ req.time }}{% if req.end_time %} - {{ req.end_time }}{% endif %}</td>
               <td>{{ req.venue }}</td>
               <td>
                 {% if req.status == 'pending' %}
@@ -390,21 +390,8 @@
     if (saved === 'light') document.getElementById('themeBtn').innerHTML = moonSVG;
 
     /* ── CHART DATA FROM JINJA ── */
-    const adminRequests = JSON.parse('{{ requests | tojson }}');
-
-    const typeCounts = {};
-    const itemCounts = {};
-
-    adminRequests.forEach(r => {
-      const t = (r.request_type || 'unknown').replace(/_/g, ' ');
-      typeCounts[t] = (typeCounts[t] || 0) + 1;
-      if (r.items_needed) {
-        r.items_needed.split(',').forEach(item => {
-          const i = item.trim().toLowerCase();
-          if (i) itemCounts[i] = (itemCounts[i] || 0) + 1;
-        });
-      }
-    });
+    const typeCounts = {{ type_counts | tojson }};
+    const itemCounts = {{ item_counts | tojson }};
 
     const typeLabels = Object.keys(typeCounts);
     const typeData = Object.values(typeCounts);
