@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NTL Resource Portal</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    [data-theme="dark"] {
+      --bg: #0f1520;
+      --card-bg: #1a2332;
+      --card-border: #2a3545;
+      --nav-bg: #151d2b;
+      --text: #e8e8e8;
+      --text-muted: #8899aa;
+      --input-bg: #111928;
+      --input-border: #2a3545;
+      --input-text: #e8e8e8;
+      --toggle-bg: #2a3545;
+    }
+    [data-theme="light"] {
+      --bg: #f5f5f5;
+      --card-bg: #ffffff;
+      --card-border: #e0e0e0;
+      --nav-bg: #151d2b;
+      --text: #1a1a1a;
+      --text-muted: #666666;
+      --input-bg: #f9f9f9;
+      --input-border: #dddddd;
+      --input-text: #1a1a1a;
+      --toggle-bg: #e0e0e0;
+    }
+    :root { --red: #C0272D; --red-bright: #E8323A; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; transition: background 0.3s, color 0.3s; }
+
+    nav { background: var(--nav-bg); border-bottom: 0.5px solid #2a3545; padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; color: #e8e8e8; text-decoration: none; }
+    .nav-logo-mark { background: var(--red); color: white; font-size: 0.65rem; font-weight: 700; padding: 3px 8px; letter-spacing: 0.08em; }
+    .theme-toggle { width: 34px; height: 34px; border-radius: 50%; background: var(--toggle-bg); border: 0.5px solid var(--card-border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
+    .theme-toggle:hover { border-color: var(--red); color: var(--red-bright); }
+
+    .page { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; position: relative; overflow: hidden; }
+    .page-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 50%, rgba(192,39,45,0.1) 0%, transparent 55%), radial-gradient(ellipse at 80% 50%, rgba(46,117,182,0.07) 0%, transparent 55%); pointer-events: none; }
+    .page-inner { position: relative; z-index: 2; width: 100%; max-width: 900px; }
+
+    .page-header { text-align: center; margin-bottom: 2.5rem; animation: fadeUp 0.5s ease both; }
+    .page-tag { font-size: 0.68rem; color: var(--red-bright); letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .page-tag::before, .page-tag::after { content: ''; display: block; width: 20px; height: 1px; background: var(--red-bright); }
+    .page-title { font-family: 'Rajdhani', sans-serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+    .page-title span { color: var(--red-bright); }
+    .page-sub { font-size: 0.82rem; color: var(--text-muted); font-weight: 300; }
+
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 680px) { .cards { grid-template-columns: 1fr; } }
+
+    .login-card { background: var(--card-bg); border: 0.5px solid var(--card-border); border-top: 2px solid var(--red); padding: 2rem; position: relative; overflow: hidden; transition: background 0.3s; }
+    .login-card:nth-child(1) { animation: fadeUp 0.5s 0.1s ease both; }
+    .login-card:nth-child(2) { animation: fadeUp 0.5s 0.2s ease both; }
+    .login-card::before { content: ''; position: absolute; top: 0; right: 0; width: 60px; height: 60px; background: rgba(192,39,45,0.05); clip-path: polygon(100% 0, 0 0, 100% 100%); }
+
+    .card-tag { font-size: 0.65rem; color: var(--red-bright); letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.3rem; }
+    .card-title { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+    .card-title span { color: var(--red-bright); }
+    .card-desc { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1.5rem; font-weight: 300; line-height: 1.5; }
+    .divider { height: 0.5px; background: var(--card-border); margin-bottom: 1.5rem; }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.65rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .req { color: var(--red-bright); margin-left: 2px; }
+    .form-control-ntl { width: 100%; background: var(--input-bg); border: 0.5px solid var(--input-border); color: var(--input-text); padding: 0.62rem 0.9rem; font-family: 'Inter', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; border-radius: 2px; }
+    .form-control-ntl:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(192,39,45,0.12); }
+    .form-control-ntl::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+    .btn-submit { width: 100%; padding: 0.8rem 2rem; background: var(--red); color: #fff; border: none; font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem; border-radius: 2px; }
+    .btn-submit:hover { background: var(--red-bright); }
+
+    .card-footer-text { text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; }
+    .card-footer-text a { color: var(--red-bright); text-decoration: none; font-weight: 500; }
+
+    .flash-success { background: rgba(34,197,94,0.08); border: 0.5px solid rgba(34,197,94,0.2); border-left: 3px solid #22c55e; color: #22c55e; padding: 0.7rem 1rem; font-size: 0.82rem; margin-bottom: 1.5rem; text-align: center; }
+    .flash-error { background: rgba(192,39,45,0.08); border: 0.5px solid rgba(192,39,45,0.2); border-left: 3px solid var(--red); color: var(--red-bright); padding: 0.7rem 1rem; font-size: 0.82rem; margin-bottom: 1.5rem; text-align: center; }
+
+    footer { background: var(--nav-bg); border-top: 0.5px solid #2a3545; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    footer p { font-size: 0.72rem; color: #4a5568; }
+    footer span { color: var(--red-bright); }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">
+      <span class="nav-logo-mark">NTL</span>
+      Resource Portal
+    </a>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" id="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </nav>
+
+  <div class="page">
+    <div class="page-bg"></div>
+    <div class="page-inner">
+      <div class="page-header">
+        <div class="page-tag">Next Technologies Limited</div>
+        <h1 class="page-title">Resource <span>Management</span> Portal</h1>
+        <p class="page-sub">Sign in to continue. Choose your access level below.</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="cards">
+        <div class="login-card">
+          <p class="card-tag">Staff Access</p>
+          <h2 class="card-title">Staff <span>Portal</span></h2>
+          <p class="card-desc">Submit and track requests for office items, meeting rooms, catering, and field day resources.</p>
+          <div class="divider"></div>
+          <form method="POST" action="/login">
+            <input type="hidden" name="role" value="staff">
+            <div class="form-group">
+              <label>Work ID <span class="req">*</span></label>
+              <input type="text" name="work_id" class="form-control-ntl" placeholder="e.g. NTL-0042" required>
+            </div>
+            <div class="form-group">
+              <label>Password <span class="req">*</span></label>
+              <input type="password" name="password" class="form-control-ntl" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-submit">Sign In as Staff &rarr;</button>
+          </form>
+          <p class="card-footer-text">No account? <a href="/register">Register here</a></p>
+        </div>
+
+        <div class="login-card">
+          <p class="card-tag">Admin Access</p>
+          <h2 class="card-title">Admin <span>Panel</span></h2>
+          <p class="card-desc">Review, approve, and reject incoming resource requests from NTL staff members.</p>
+          <div class="divider"></div>
+          <form method="POST" action="/login">
+            <input type="hidden" name="role" value="admin">
+            <div class="form-group">
+              <label>Work ID <span class="req">*</span></label>
+              <input type="text" name="work_id" class="form-control-ntl" placeholder="e.g. NTL-0001" required>
+            </div>
+            <div class="form-group">
+              <label>Password <span class="req">*</span></label>
+              <input type="password" name="password" class="form-control-ntl" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-submit">Sign In as Admin &rarr;</button>
+          </form>
+          <p class="card-footer-text">Admin accounts are pre-created by IT.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>NTL Resource Management Portal &mdash; Internal Use Only</p>
+    <p>Built by <span>Nicole Wangeci</span> &mdash; Cloud Intern 2026</p>
+  </footer>
+
+  <script>
+    const moonSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+    const sunSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('themeBtn').innerHTML = isDark ? moonSVG : sunSVG;
+      localStorage.setItem('ntl-theme', isDark ? 'light' : 'dark');
+    }
+    const saved = localStorage.getItem('ntl-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    if (saved === 'light') document.getElementById('themeBtn').innerHTML = moonSVG;
+  </script>
+</body>
+</html>
