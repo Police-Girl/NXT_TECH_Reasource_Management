@@ -43,7 +43,7 @@ def get_user_by_work_id(work_id):
 
 def create_user(name, work_id, email, password, role="staff"):
     """Hash the password and save the user. Returns False if the work ID is taken."""
-    if get_user_by_work_id(work_id):
+    if get_user_by_work_id(work_id) or get_user_by_email(email):
         return False
     get_container("users").create_item(body={
         "id": str(uuid.uuid4()),
@@ -59,3 +59,18 @@ def create_user(name, work_id, email, password, role="staff"):
 def verify_password(user_data, password):
     """Compare a typed password with the stored hash."""
     return check_password_hash(user_data["password"], password)
+
+def get_user_by_email(email):
+    """Case-insensitive email lookup. Returns the raw user document or None."""
+    rows = list(get_container("users").query_items(
+        query="SELECT * FROM c WHERE LOWER(c.email) = @value",
+        parameters=[{"name": "@value", "value": (email or "").strip().lower()}],
+        enable_cross_partition_query=True,
+    ))
+    return rows[0] if rows else None
+
+
+def get_user_by_login(identifier):
+    """Sign-in lookup: the person may type either their Work ID or their email."""
+    identifier = (identifier or "").strip()
+    return get_user_by_work_id(identifier) or get_user_by_email(identifier)

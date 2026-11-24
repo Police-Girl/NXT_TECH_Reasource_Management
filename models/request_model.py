@@ -1,4 +1,5 @@
-# models/request_model.py - MODEL for resource requests.
+# models/request_model.py - MODEL for resource requests stored in Azure Cosmos DB.
+# Uses the shared db.get_container("requests") helper (partition key: /request_type).
 
 import uuid
 
@@ -6,52 +7,79 @@ from db import get_container
 
 
 def _run(query, parameters=None):
-    return list(get_container("requests").query_items(
-        query=query,
-        parameters=parameters or [],
-        enable_cross_partition_query=True,
-    ))
-
-
-def get_all_requests():
-    """Every request, newest first."""
-    return _run("SELECT * FROM c ORDER BY c._ts DESC")
-
-
-def get_requests_by_user(work_id):
-    """Only the requests submitted by one staff member, newest first."""
-    return _run(
-        "SELECT * FROM c WHERE c.work_id = @work_id ORDER BY c._ts DESC",
-        [{"name": "@work_id", "value": work_id}],
+    """Execute a cross-partition SQL query against the Cosmos DB 'requests' container."""
+    return list(
+        get_container("requests").query_items(
+            query=query,
+            parameters=parameters or [],
+            enable_cross_partition_query=True,
+        )
     )
 
 
+def _normalize_request(doc):
+    """Ensure every request document has consistent default fields for UI rendering."""
+    item = dict(doc)
+    item["status"] = (item.get("status") or "pending").strip().lower()
+    item["request_type"] = (item.get("request_type") or "general").strip().lower()
+    return item
+
+
+def get_all_requests():
+    """Collect all resource requests across every partition, sorted newest-first in Python."""
+    # Avoid SQL 'ORDER BY c._ts DESC' across partitions so missing composite indexes never break queries
+    items = [_normalize_request(r) for r in _run("SELECT * FROM c")]
+    return sorted(items, key=lambda r: r.get("_ts", 0), reverse=True)
+
+
+def get_requests_by_user(work_id):
+    """Collect only the requests submitted by one staff member (used for their status tracker)."""
+    clean_work_id = (work_id or "").strip()
+    if not clean_work_id:
+        return []
+
+    # Case-insensitive match on work_id so staff always see their pending/approved/rejected requests
+    items = [
+        _normalize_request(r)
+        for r in _run(
+            "SELECT * FROM c WHERE UPPER(c.work_id) = @work_id",
+            [{"name": "@work_id", "value": clean_work_id.upper()}],
+        )
+    ]
+    return sorted(items, key=lambda r: r.get("_ts", 0), reverse=True)
+
+
 def get_request(request_id, request_type):
-    """Read one request. Partition key is request_type."""
-    return get_container("requests").read_item(item=request_id, partition_key=request_type)
+    """Read a single request document directly using its ID and partition key (/request_type)."""
+    doc = get_container("requests").read_item(item=request_id, partition_key=request_type)
+    return _normalize_request(doc)
 
 
 def create_request(name, work_id, request_type, items_needed, date, time, end_time, venue):
-    """Save a new request with status 'pending'."""
+    """Create and persist a new staff resource request in Azure Cosmos DB with status 'pending'."""
+    clean_type = (request_type or "general").strip().lower()
+    clean_work_id = (work_id or "").strip().upper()
+
     data = {
-        "id": str(uuid.uuid4()),
-        "name": name,
-        "work_id": work_id,
-        "request_type": request_type,
-        "items_needed": items_needed,
+        "id": str(uuid.uuid4()),          # Unique document ID in Cosmos DB
+        "name": (name or "").strip(),
+        "work_id": clean_work_id,         # Links the request back to the submitting staff member
+        "request_type": clean_type,       # Partition key (/request_type) for the 'requests' container
+        "items_needed": (items_needed or "").strip(),
         "date": date,
         "time": time,
         "end_time": end_time,
-        "venue": venue,
-        "status": "pending",
+        "venue": (venue or "").strip(),
+        "status": "pending",              # Initial lifecycle state until admin approves or rejects
     }
     get_container("requests").create_item(body=data)
     return data
 
 
 def set_request_status(item, status):
-    """Change a request's status ('approved' or 'rejected') and save it."""
-    item["status"] = status
+    """Update a request's status ('approved' or 'rejected') in Azure Cosmos DB."""
+    item["status"] = status.strip().lower()
+    # replace_item updates the document in place while preserving its partition key (/request_type)
     get_container("requests").replace_item(item=item["id"], body=item)
     return item
 
@@ -59,7 +87,7 @@ def set_request_status(item, status):
 # ---------- double-booking check ----------
 
 def _item_set(text):
-    """'Projector, HDMI cable' -> {'projector', 'hdmi cable'}"""
+    """Parse comma-separated items ('Projector, HDMI cable' -> {'projector', 'hdmi cable'})."""
     return {part.strip().lower() for part in (text or "").split(",") if part.strip()}
 
 
@@ -90,7 +118,7 @@ def find_conflicts(req):
 # ---------- chart data for the admin dashboard ----------
 
 def get_type_counts(requests):
-    """{'Office Items': 4, 'Field Day': 2, ...}"""
+    """Aggregate request counts by formatted category ({'Office Items': 4, 'Field Day': 2, ...})."""
     counts = {}
     for r in requests:
         label = (r.get("request_type") or "unknown").replace("_", " ").title()
@@ -99,7 +127,7 @@ def get_type_counts(requests):
 
 
 def get_item_counts(requests, limit=6):
-    """Most requested individual items: {'projector': 5, ...}"""
+    """Return the top requested individual items ({'projector': 5, ...}) for dashboard charts."""
     counts = {}
     for r in requests:
         for item in _item_set(r.get("items_needed")):

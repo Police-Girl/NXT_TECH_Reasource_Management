@@ -4,7 +4,7 @@
 from flask import Blueprint, flash, redirect, render_template, request
 from flask_login import login_required, login_user, logout_user
 
-from models.user_model import User, create_user, get_user_by_work_id, verify_password
+from models.user_model import User, create_user, get_user_by_login, verify_password
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -28,7 +28,7 @@ def register():
 
         # Role is forced to 'staff' here - nobody can self-register as admin.
         if not create_user(name, work_id, email, password, role="staff"):
-            flash("That Work ID is already registered.", "error")
+            flash("That Work ID or email is already registered.", "error")
             return redirect("/register")
 
         flash("Account created. Please sign in.", "success")
@@ -39,18 +39,13 @@ def register():
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    """Checks credentials, starts the session, sends each role to its own home page."""
-    work_id = request.form.get("work_id", "").strip()
+    """One sign-in form for everyone. The stored role decides where you land."""
+    identifier = request.form.get("login", "").strip()
     password = request.form.get("password", "")
-    portal = request.form.get("role", "staff")  # which card they used on the landing page
 
-    user_data = get_user_by_work_id(work_id)
+    user_data = get_user_by_login(identifier)
     if not user_data or not verify_password(user_data, password):
-        flash("Invalid Work ID or password.", "error")
-        return redirect("/landing")
-
-    if user_data["role"] != portal:
-        flash(f"This account is not a {portal} account.", "error")
+        flash("Invalid Work ID, email or password.", "error")
         return redirect("/landing")
 
     user = User(user_data)

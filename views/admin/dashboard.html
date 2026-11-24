@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NTL Admin Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    /* ── PURE DARK THEME TOKENS ── */
+    :root {
+      --bg: #0f1520;
+      --card-bg: #1a2332;
+      --card-border: #2a3545;
+      --nav-bg: #151d2b;
+      --nav-border: #2a3545;
+      --sidebar-bg: #1a2332;
+      --text: #e8e8e8;
+      --text-muted: #8899aa;
+      --input-bg: #111928;
+      --input-border: #2a3545;
+      --table-hover: rgba(255,255,255,0.03);
+      --table-head: rgba(255,255,255,0.03);
+      --red: #C0272D;
+      --red-bright: #E8323A;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: var(--nav-bg);
+      border-bottom: 0.5px solid var(--nav-border);
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-left { display: flex; align-items: center; gap: 0.8rem; }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-logo-mark {
+      background: var(--red);
+      color: #ffffff;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 3px 7px;
+      letter-spacing: 0.08em;
+    }
+    .nav-badge {
+      font-size: 0.62rem;
+      background: rgba(192,39,45,0.15);
+      border: 0.5px solid var(--red);
+      color: var(--red-bright);
+      padding: 2px 7px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .nav-right { display: flex; align-items: center; gap: 1.2rem; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--red-bright); }
+    .nav-links a.active { color: var(--text); font-weight: 500; }
+    .nav-links a.signout { color: #ef4444; }
+    .nav-links a.signout:hover { color: #f87171; }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; padding-top: 60px; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 210px;
+      min-height: calc(100vh - 60px);
+      background: var(--sidebar-bg);
+      border-right: 0.5px solid var(--card-border);
+      padding: 1.5rem 0;
+      position: fixed;
+      top: 60px; left: 0; bottom: 0;
+      overflow-y: auto;
+    }
+    .sidebar-section { margin-bottom: 1.2rem; }
+    .sidebar-label {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0 1.2rem;
+      margin-bottom: 0.4rem;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0.55rem 1.2rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .sidebar-link:hover { color: var(--text); background: rgba(192,39,45,0.05); }
+    .sidebar-link.active {
+      color: var(--text);
+      border-left-color: var(--red);
+      background: rgba(192,39,45,0.08);
+    }
+    .sidebar-link svg {
+      width: 15px; height: 15px;
+      stroke: currentColor; fill: none; stroke-width: 1.5;
+      flex-shrink: 0;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 210px;
+      flex: 1;
+      padding: 2rem;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.8rem;
+    }
+    .page-tag {
+      font-size: 0.65rem;
+      color: var(--red-bright);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 0.2rem;
+    }
+    .page-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+    .page-title span { color: var(--red-bright); }
+    .page-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 300;
+      margin-top: 0.2rem;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary-dark {
+      background: var(--red);
+      color: #ffffff;
+      text-decoration: none;
+      padding: 0.45rem 0.9rem;
+      border-radius: 2px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: background 0.15s;
+    }
+    .btn-primary-dark:hover { background: var(--red-bright); color: #ffffff; }
+    .btn-secondary-dark {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 0.5px solid var(--card-border);
+      text-decoration: none;
+      padding: 0.45rem 0.9rem;
+      border-radius: 2px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-secondary-dark:hover { border-color: var(--red); color: #ffffff; }
+
+    /* ── STATS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
+    .stat-card {
+      background: var(--card-bg);
+      border: 0.5px solid var(--card-border);
+      padding: 1.1rem 1.3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--blue);
+    }
+    .stat-card.yellow::after { background: var(--yellow); }
+    .stat-card.green::after { background: var(--green); }
+    .stat-card.red::after { background: var(--red); }
+    .stat-label {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+    .stat-value {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 0.2rem;
+      color: var(--blue);
+    }
+    .stat-value.yellow { color: var(--yellow); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.red { color: var(--red-bright); }
+    .stat-sub { font-size: 0.65rem; color: var(--text-muted); }
+
+    /* ── CHARTS ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--card-bg);
+      border: 0.5px solid var(--card-border);
+      padding: 1.2rem;
+    }
+    .chart-card-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+    .chart-wrap { position: relative; height: 180px; }
+
+    /* ── INVENTORY ── */
+    .inv-card {
+      background: var(--card-bg);
+      border: 0.5px solid var(--card-border);
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .inv-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .inv-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .btn-edit {
+      padding: 0.3rem 0.8rem;
+      background: transparent;
+      border: 0.5px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-edit:hover { border-color: var(--red); color: var(--red-bright); }
+    .inv-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 0.8rem;
+    }
+    @media (max-width: 700px) { .inv-grid { grid-template-columns: repeat(2,1fr); } }
+    .inv-item {
+      background: var(--bg);
+      border: 0.5px solid var(--card-border);
+      padding: 0.8rem 1rem;
+    }
+    .inv-name {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .inv-count {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .inv-status {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .inv-status.ok { color: var(--green); }
+    .inv-status.low { color: var(--yellow); }
+    .inv-status.out { color: var(--red-bright); }
+
+    /* ── TABLE ── */
+    .table-card {
+      background: var(--card-bg);
+      border: 0.5px solid var(--card-border);
+      overflow: hidden;
+    }
+    .table-header {
+      padding: 0.9rem 1.2rem;
+      border-bottom: 0.5px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .table-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .table-count { font-size: 0.7rem; color: var(--text-muted); }
+    .requests-table { width: 100%; border-collapse: collapse; }
+    .requests-table thead tr { background: var(--table-head); }
+    .requests-table thead th {
+      padding: 0.65rem 1rem;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-align: left;
+      border-bottom: 0.5px solid var(--card-border);
+    }
+    .requests-table tbody tr {
+      border-bottom: 0.5px solid var(--card-border);
+      transition: background 0.1s;
+    }
+    .requests-table tbody tr:hover { background: var(--table-hover); }
+    .requests-table tbody tr:last-child { border-bottom: none; }
+    .requests-table tbody td {
+      padding: 0.8rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text);
+      vertical-align: middle;
+    }
+    .td-name { font-weight: 500; }
+    .td-id {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.18rem 0.6rem;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .badge-pending {
+      background: rgba(245,158,11,0.1);
+      border: 0.5px solid rgba(245,158,11,0.3);
+      color: var(--yellow);
+    }
+    .badge-approved {
+      background: rgba(34,197,94,0.1);
+      border: 0.5px solid rgba(34,197,94,0.3);
+      color: var(--green);
+    }
+    .badge-rejected {
+      background: rgba(192,39,45,0.1);
+      border: 0.5px solid rgba(192,39,45,0.3);
+      color: var(--red-bright);
+    }
+
+    /* ── ACTION BUTTONS ── */
+    .btn-approve {
+      padding: 0.25rem 0.7rem;
+      background: rgba(34,197,94,0.1);
+      border: 0.5px solid rgba(34,197,94,0.3);
+      color: var(--green);
+      font-size: 0.68rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.15s;
+      margin-right: 4px;
+    }
+    .btn-approve:hover { background: rgba(34,197,94,0.2); color: var(--green); }
+    .btn-reject {
+      padding: 0.25rem 0.7rem;
+      background: rgba(192,39,45,0.1);
+      border: 0.5px solid rgba(192,39,45,0.3);
+      color: var(--red-bright);
+      font-size: 0.68rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.15s;
+    }
+    .btn-reject:hover { background: rgba(192,39,45,0.2); color: var(--red-bright); }
+
+    /* ── FLASH ── */
+    .flash-success {
+      background: rgba(34,197,94,0.08);
+      border: 0.5px solid rgba(34,197,94,0.2);
+      border-left: 3px solid var(--green);
+      color: var(--green);
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      margin-bottom: 1.5rem;
+    }
+    .flash-error {
+      background: rgba(192,39,45,0.08);
+      border: 0.5px solid rgba(192,39,45,0.2);
+      border-left: 3px solid var(--red);
+      color: var(--red-bright);
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      margin-bottom: 1.5rem;
+    }
+    .empty-state {
+      padding: 3rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--nav-bg);
+      border-top: 0.5px solid var(--nav-border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-left: 210px;
+    }
+    footer p { font-size: 0.7rem; color: #4a5568; margin: 0; }
+    footer span { color: var(--red-bright); }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main, footer { margin-left: 0; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a href="/landing" class="nav-logo">
+        <span class="nav-logo-mark">NTL</span>
+        Resource Portal
+      </a>
+      <span class="nav-badge">Admin</span>
+    </div>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="/admin" class="active">Dashboard</a></li>
+        <li><a href="/messages">Messages</a></li>
+        <li><a href="/admin/users">Staff Users</a></li>
+        <li><a href="/logout" class="signout">Sign Out</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <a href="/admin" class="sidebar-link active">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="/messages" class="sidebar-link">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Messages
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Requests</div>
+        <a href="/admin" class="sidebar-link">
+          <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          All Requests
+        </a>
+        <a href="/admin?filter=pending" class="sidebar-link">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Pending
+        </a>
+        <a href="/admin?filter=approved" class="sidebar-link">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Approved
+        </a>
+        <a href="/admin?filter=rejected" class="sidebar-link">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Rejected
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Inventory</div>
+        <a href="/admin/inventory" class="sidebar-link">
+          <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          View Stock
+        </a>
+        <a href="/admin/inventory/edit" class="sidebar-link">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit Items
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Users &amp; Account</div>
+        <a href="/admin/users" class="sidebar-link">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          Create Staff User
+        </a>
+        <a href="/logout" class="sidebar-link">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <div class="page-tag">Admin Panel</div>
+          <h1 class="page-title">Resource <span>Dashboard</span></h1>
+          <p class="page-sub">Review and action incoming resource requests from NTL staff.</p>
+        </div>
+        <div class="header-actions">
+          <a href="/messages" class="btn-secondary-dark">Messages</a>
+          <a href="/admin/users" class="btn-primary-dark">+ Create Staff User</a>
+        </div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Requests</div>
+          <div class="stat-value">{{ requests|length }}</div>
+          <div class="stat-sub">All time</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value yellow">{{ requests|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+          <div class="stat-sub">Awaiting action</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Approved</div>
+          <div class="stat-value green">{{ requests|selectattr('status', 'equalto', 'approved')|list|length }}</div>
+          <div class="stat-sub">Granted</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Rejected</div>
+          <div class="stat-value red">{{ requests|selectattr('status', 'equalto', 'rejected')|list|length }}</div>
+          <div class="stat-sub">Declined</div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-card-title">Requests by Type</div>
+          <div class="chart-wrap">
+            <canvas id="typeChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">Most Requested Items</div>
+          <div class="chart-wrap">
+            <canvas id="itemChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="inv-card">
+        <div class="inv-header">
+          <div class="inv-title">Inventory Status</div>
+          <a href="/admin/inventory/edit" class="btn-edit">Edit Inventory</a>
+        </div>
+        <div class="inv-grid" id="inventoryGrid">
+          <div class="inv-item"><div class="inv-name">Loading...</div></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">Incoming Requests</span>
+          <span class="table-count">{{ table_requests|length }} shown</span>
+        </div>
+        {% if table_requests %}
+        <table class="requests-table">
+          <thead>
+            <tr>
+              <th>Staff Member</th>
+              <th>Work ID</th>
+              <th>Type</th>
+              <th>Items Needed</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Venue</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for req in table_requests %}
+            <tr>
+              <td class="td-name">{{ req.name }}</td>
+              <td class="td-id">{{ req.work_id }}</td>
+              <td>{{ req.request_type | replace('_', ' ') | title }}</td>
+              <td>{{ req.items_needed }}</td>
+              <td>{{ req.date }}</td>
+              <td>{{ req.time }}{% if req.end_time %} - {{ req.end_time }}{% endif %}</td>
+              <td>{{ req.venue }}</td>
+              <td>
+                {% if req.status == 'pending' %}
+                  <span class="badge badge-pending">Pending</span>
+                {% elif req.status == 'approved' %}
+                  <span class="badge badge-approved">Approved</span>
+                {% else %}
+                  <span class="badge badge-rejected">Rejected</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if req.status == 'pending' %}
+                  <a href="/admin/approve/{{ req.id }}/{{ req.request_type }}" class="btn-approve">Approve</a>
+                  <a href="/admin/reject/{{ req.id }}/{{ req.request_type }}" class="btn-reject">Reject</a>
+                {% else %}
+                  &mdash;
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">No requests yet.</div>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    <p>NTL Resource Management Portal &mdash; Internal Use Only</p>
+    <p>Built by <span>Nicole Wangeci</span> &mdash; Cloud Intern 2026</p>
+  </footer>
+
+  <script>
+    /* ── CHART DATA FROM JINJA ── */
+    const typeCounts = {{ type_counts | tojson }};
+    const itemCounts = {{ item_counts | tojson }};
+
+    const typeLabels = Object.keys(typeCounts);
+    const typeData = Object.values(typeCounts);
+
+    const sortedItems = Object.entries(itemCounts).sort((a,b) => b[1]-a[1]).slice(0,6);
+    const itemLabels = sortedItems.map(x => x[0]);
+    const itemData = sortedItems.map(x => x[1]);
+
+    const COLORS = ['#3b82f6','#8b5cf6','#C0272D','#f59e0b','#22c55e','#06b6d4'];
+
+    function buildCharts() {
+      const tickColor = '#8899aa';
+      const gridColor = 'rgba(255,255,255,0.05)';
+
+      const baseOpts = (labels, data) => ({
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: COLORS.slice(0, data.length),
+            borderRadius: 2,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: tickColor, font: { size: 10 } }, grid: { color: gridColor } },
+            y: { ticks: { color: tickColor, font: { size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+
+      new Chart(document.getElementById('typeChart'), baseOpts(typeLabels, typeData));
+      new Chart(document.getElementById('itemChart'), baseOpts(
+        itemLabels.length ? itemLabels : ['No data'],
+        itemData.length ? itemData : [0]
+      ));
+    }
+
+    /* ── INVENTORY ── */
+    async function loadInventory() {
+      try {
+        const res = await fetch('/admin/inventory/data');
+        const items = await res.json();
+        const grid = document.getElementById('inventoryGrid');
+        if (!items.length) {
+          grid.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;">No inventory items yet. <a href="/admin/inventory/edit" style="color:var(--red-bright);">Add items</a></div>';
+          return;
+        }
+        grid.innerHTML = items.map(item => {
+          const status = item.quantity === 0 ? 'out' : item.quantity <= 2 ? 'low' : 'ok';
+          const label = status === 'out' ? 'Out of stock' : status === 'low' ? 'Low stock' : 'Available';
+          return `<div class="inv-item"><div class="inv-name">${item.name}</div><div class="inv-count">${item.quantity}</div><div class="inv-status ${status}">${label}</div></div>`;
+        }).join('');
+      } catch(e) {
+        document.getElementById('inventoryGrid').innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;">Could not load inventory.</div>';
+      }
+    }
+
+    buildCharts();
+    loadInventory();
+  </script>
+</body>
+</html>

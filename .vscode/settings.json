@@ -4,5 +4,6 @@
     "vscord.status.state.idle.enabled": false,
     "vscord.status.state.text.idle": "Trying not to crash out guys...",
     "vscord.status.state.text.notInFile": "Lost",
-    "vscord.status.image.large.idle.text": "Idol"
+    "vscord.status.image.large.idle.text": "Idol",
+    "vscord.behaviour.debug": true
 }
