@@ -1,5 +1,6 @@
-# controllers/staff_controller.py - CONTROLLER for staff pages and request submission.
-# Admins cannot submit staff requests and are redirected to /admin.
+# controllers/staff_controller.py
+# Controller for staff workspace views, resource request submission, and personal request history.
+# Admin users are redirected to /admin so they cannot submit staff-side requests.
 
 from flask import Blueprint, flash, redirect, render_template, request
 from flask_login import current_user, login_required
@@ -8,10 +9,10 @@ from models.inventory_model import get_all_inventory
 from models.notification_model import create_notification
 from models.request_model import create_request, get_requests_by_user
 
-# Blueprint managing staff views, request creation, and personal request status history
+# Blueprint handling staff routes and request submissions
 staff_bp = Blueprint("staff", __name__)
 
-# Valid request category keys corresponding to Cosmos DB 'requests' partition values (/request_type)
+# Allowed request category keys matching Cosmos DB 'requests' partition values (/request_type)
 REQUEST_TYPES = {
     "equipment",
     "office_items",
@@ -19,9 +20,10 @@ REQUEST_TYPES = {
     "tea_catering",
     "field_day",
     "appliance",
+    "vehicles",
 }
 
-# Maps UI category labels or inv_category_filter values into canonical REQUEST_TYPES keys
+# Maps UI category labels or inv_category_filter values to canonical REQUEST_TYPES keys
 CATEGORY_TO_REQUEST_TYPE = {
     "equipment": "equipment",
     "office_items": "office_items",
@@ -33,28 +35,31 @@ CATEGORY_TO_REQUEST_TYPE = {
     "field_day": "field_day",
     "appliance": "appliance",
     "appliances": "appliance",
+    "vehicles": "vehicles",
+    "vehicle": "vehicles",
 }
 
 
 def _normalize_request_type(raw_value: str) -> str:
-    """Normalize labels like 'Equipment' or 'Office Items' into snake_case keys."""
+    """Normalize raw category strings (e.g. 'Vehicles' or 'Office Items') into snake_case keys."""
     cleaned = (raw_value or "").strip().lower().replace("-", "_").replace(" ", "_")
     return CATEGORY_TO_REQUEST_TYPE.get(cleaned, cleaned)
 
 
 def _extract_items_needed(form) -> str:
-    """Collect selected items from multi-value fields, text inputs, or fallback names."""
+    """Extract requested item names from multi-value inputs or fallback field names."""
     values = [v.strip() for v in form.getlist("items_needed") if v and v.strip()]
     if values:
         return ", ".join(values)
-    # Fallback in case an HTML form uses 'items' or 'item' as the input name
+
+    # Support alternate single-value field names if a form variant uses 'items' or 'item'
     return (form.get("items") or form.get("item") or "").strip()
 
 
 @staff_bp.route("/")
 @login_required
 def index():
-    """Render the staff workspace form, inventory options, and the staff user's requests."""
+    """Render the staff request form, available inventory, and the user's existing requests."""
     if current_user.role == "admin":
         return redirect("/admin")
 
@@ -68,15 +73,16 @@ def index():
 @staff_bp.route("/submit", methods=["POST"])
 @login_required
 def submit():
-    """Validate form inputs, persist the request to Cosmos DB, and notify admins in-app."""
+    """Validate staff request fields, save to Cosmos DB, and notify admins in-app."""
     if current_user.role == "admin":
         flash("Admins cannot submit requests.", "error")
         return redirect("/admin")
 
-    # Prefer explicit request_type; fall back to inv_category_filter when that select is used
+    # Use explicit request_type when present; otherwise fall back to inv_category_filter
     raw_type = request.form.get("request_type") or request.form.get("inv_category_filter") or ""
     request_type = _normalize_request_type(raw_type)
-    # Default blank or 'all' filter values to 'office_items' so a valid partition key is used
+
+    # Default empty or 'all' selections to 'office_items' so a valid partition key is stored
     if request_type in ("", "all"):
         request_type = "office_items"
 
@@ -86,7 +92,7 @@ def submit():
     end_time = (request.form.get("end_time") or "").strip()
     venue = (request.form.get("venue") or "").strip() or "N/A"
 
-    # Reject incomplete submissions or unsupported request categories
+    # Reject missing required inputs or categories outside REQUEST_TYPES
     if request_type not in REQUEST_TYPES or not (items and date and time and end_time):
         print(
             "[staff.submit] Validation failed:",
@@ -103,15 +109,15 @@ def submit():
         flash("Please complete every required field.", "error")
         return redirect("/")
 
-    # Ensure the requested time slot ends after it starts
+    # Reject non-positive or inverted time windows
     if end_time <= time:
         flash("End time must be later than the start time.", "error")
         return redirect("/")
 
-    # Store custom venue only for field_day bookings; otherwise standardize to 'N/A'
+    # Preserve custom venue only for field_day requests; normalize all other types to 'N/A'
     final_venue = venue if request_type == "field_day" else "N/A"
 
-    # Pull identity from the logged-in session rather than trusting hidden form fields
+    # Derive requester identity from the authenticated session rather than client form inputs
     create_request(
         name=current_user.name,
         work_id=current_user.work_id,
@@ -123,7 +129,7 @@ def submit():
         venue=final_venue,
     )
 
-    # Record an in-platform notification in Cosmos DB for admin review
+    # Create an admin notification so pending requests appear in the admin alert feed
     create_notification(
         recipient_role="admin",
         message=(
@@ -141,9 +147,10 @@ def submit():
 @staff_bp.route("/my-requests")
 @login_required
 def my_requests():
-    """Show the current staff user's submitted requests and their approval statuses."""
+    """Display the logged-in staff member's submitted requests and approval statuses."""
     if current_user.role == "admin":
         return redirect("/admin")
+
     return render_template(
         "staff/my_requests.html",
         requests=get_requests_by_user(current_user.work_id),
